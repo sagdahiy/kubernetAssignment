@@ -1,0 +1,102 @@
+deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp1
+  template:
+    metadata:
+      labels:
+        app: webapp1
+    spec:
+      containers:
+      - name: webapp1
+        image: kennethreitz/httpbin
+        ports:
+        - containerPort: 80
+
+
+make pods:
+kubectl apply -f deplyment.yaml
+kubectl get pods -o wide
+execute pod:
+kubectl exec -it webapp1-6b884887d9-gf548 sh
+
+
+************
+create service.yaml file
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp1-svc
+  labels:
+    app: webapp1
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: webapp1
+
+
+kubectl apply -f service.yaml
+kubctl service webapp1-svc
+
+*************************
+create ingress.yaml file
+
+
+
+apiVersion: networking.k8s.io/vi
+kind: Ingress
+metadata:
+  name: webapp1-ingress
+  annotations:
+    kubernets.io/ingress.class:"nginx"
+  labels:
+    name: webapps1
+spec:
+  rules:
+  - host:myhost.com
+    http:
+      paths:
+        - pathType: Prefix
+          path: "/anything"
+          backend:
+            service:
+              names: first-service
+              port:
+                number: 80
+
+        - pathType: Prefix
+          path: "/uuid"
+          backend:
+            service:
+              names: second-service
+              port:
+                number: 80
+
+* become root user*
+sudo su
+minikube ip
+cat /etc/hosts
+echo "192.168.49.2 myhost.com" >> /etc/hosts
+minikube ssh  
+
+*back to user*
+
+kubectl apply -f ingress.yaml
+
+* curl command*
+curl myhost.com/anything
+
+
+
